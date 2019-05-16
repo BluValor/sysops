@@ -1,0 +1,16 @@
+#ifndef ZAD1_EXIT_FUNC_H
+#define ZAD1_EXIT_FUNC_H
+
+
+#include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <errno.h>
+
+
+void die(const char *err_template, ...);
+void die_errno(const char *err_template, ...);
+
+
+#endif //ZAD1_EXIT_FUNC_H

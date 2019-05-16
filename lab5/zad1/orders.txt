@@ -1,0 +1,3 @@
+ps -e | head -5 | head -4 | tr 0 Z | tr ? !
+ls -a -l | head -10 | tr - + | tr abcdef ghjikl
+echo laczla dybugyrka | tr ly ke

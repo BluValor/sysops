@@ -1,0 +1,3 @@
+file1 ./files_to_monitor/file1.txt 2
+file2 ./files_to_monitor/file2.txt 3
+file3 ./files_to_monitor/file3.txt 4

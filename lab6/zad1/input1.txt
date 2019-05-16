@@ -1,0 +1,22 @@
+ECHO let's do some echoing
+ECHO boo
+ECHO BOOO
+TOALL booooo
+TOALL booo BOOO boooo
+ECHO Who's there?
+LIST
+ECHO And for friends!
+FRIENDS 0 1 2
+ECHO Don't like nr. 1!
+DEL 1
+ECHO Oh not really! :>
+ADD 1
+ECHO Nr. 2 is the bad guy after all. :/
+DEL 2
+TOFRIENDS BOOOO
+FRIENDS
+ECHO No friends!
+TOFRIENDS See?
+ECHO Bye!
+TOONE 1 And especially for you: bye bye ^^ ! :>
+STOP
