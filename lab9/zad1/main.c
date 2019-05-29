@@ -7,9 +7,6 @@
 #include "queue.h"
 
 
-#define MESSAGE_SIZE 512
-
-
 time_t start_time;
 int trolleys_left, max_trolley_load, rides_count;
 queue *passengers_queue, *trolleys_queue;
@@ -73,20 +70,20 @@ time_t get_current_time() {
 }
 
 
-char* append_time(char* buffer) {
+void print_message(const char *template, ...) {
 
-    char tmp[MESSAGE_SIZE];
-
-    snprintf(tmp, MESSAGE_SIZE, "%s Timestamp: %ld\n", buffer, get_current_time() - start_time);
-    snprintf(buffer, MESSAGE_SIZE, "%s", tmp);
-    return buffer;
+    va_list args;
+    va_start(args, template);
+    char buffer[256];
+    snprintf(buffer, 256, "%s Timestamp: %ld\n", template, get_current_time() - start_time);
+    vfprintf(stderr, buffer, args);
+    va_end(args);
 }
 
 
 void* passenger_loop(void* data) {
 
     person* a_person = (person*) data;
-    char message[MESSAGE_SIZE];
 
     pthread_mutex_lock(&mutex);
 
@@ -98,9 +95,8 @@ void* passenger_loop(void* data) {
         if (trolleys_left == 0)
             break;
 
-        snprintf(message, MESSAGE_SIZE, "Passenger nr. %d is entering trolley. Current passengers amount: %d.",
-                a_person -> id, a_person -> a_trolley -> load + 1);
-        printf("%s", append_time(message));
+        print_message("Passenger nr. %d is entering trolley. Current passengers amount: %d.",
+                      a_person -> id, a_person -> a_trolley -> load + 1);
 
         a_person -> action = BOARDING;
         pthread_cond_broadcast(&cond_passenger_entering);
@@ -110,8 +106,7 @@ void* passenger_loop(void* data) {
 
         if (a_person -> action == IDLE_START){
 
-            snprintf(message, MESSAGE_SIZE, "Passenger nr. %d is pushing start button.", a_person -> id);
-            printf("%s", append_time(message));
+            print_message("Passenger nr. %d is pushing start button.", a_person -> id);
             a_person -> action = MOVING_STARTED;
 
         } else if (a_person -> action == IDLE_IN)
@@ -122,18 +117,15 @@ void* passenger_loop(void* data) {
         while (a_person -> action != READY_IN)
             pthread_cond_wait(&cond_passengers_waiting_to_leave, &mutex);
 
-        snprintf(message, MESSAGE_SIZE,
-                "Passenger nr. %d is getting out of the trolley. Current passengers amount: %d.",
-                 a_person -> id, a_person -> a_trolley -> load - 1);
-        printf("%s", append_time(message));
+        print_message("Passenger nr. %d is getting out of the trolley. Current passengers amount: %d.",
+                      a_person -> id, a_person -> a_trolley -> load - 1);
 
         a_person -> action = INITIAL;
         pthread_cond_broadcast(&cond_passenger_left);
         push_queue(passengers_queue, a_person);
     }
 
-    snprintf(message, MESSAGE_SIZE, "Passenger nr. %d is closing it's thread.", a_person -> id);
-    printf("%s", append_time(message));
+    print_message("Passenger nr. %d is closing it's thread.", a_person -> id);
 
     pthread_mutex_unlock(&mutex);
     return 0;
@@ -143,7 +135,6 @@ void* passenger_loop(void* data) {
 void* trolley_loop(void* data) {
 
     trolley* a_trolley = (trolley*) data;
-    char message[MESSAGE_SIZE];
 
     pthread_mutex_lock(&mutex);
 
@@ -153,8 +144,7 @@ void* trolley_loop(void* data) {
 
     for (int i = 0; i < rides_count; i++) {
 
-        snprintf(message, MESSAGE_SIZE, "Trolley nr. %d is opening doors.", a_trolley -> id);
-        printf("%s", append_time(message));
+        print_message("Trolley nr. %d is opening doors.", a_trolley -> id);
 
         while (a_trolley -> load != max_trolley_load) {
 
@@ -175,8 +165,7 @@ void* trolley_loop(void* data) {
             a_person -> action = IDLE_IN;
         }
 
-        snprintf(message, MESSAGE_SIZE, "Trolley nr. %d is closing doors.", a_trolley -> id);
-        printf("%s", append_time(message));
+        print_message("Trolley nr. %d is closing doors.", a_trolley -> id);
 
         int passenger_to_push_start = rand() % max_trolley_load;
         a_trolley -> passengers[passenger_to_push_start] -> action = IDLE_START;
@@ -190,8 +179,7 @@ void* trolley_loop(void* data) {
                 pthread_cond_wait(&cond_passengers_preparing_to_start, &mutex);
         }
 
-        snprintf(message, MESSAGE_SIZE, "Trolley nr. %d is starting moving.", a_trolley -> id);
-        printf("%s", append_time(message));
+        print_message("Trolley nr. %d is starting moving.", a_trolley -> id);
 
         pop_queue(trolleys_queue, (void**) &object);
         push_queue(trolleys_queue, a_trolley);
@@ -201,14 +189,12 @@ void* trolley_loop(void* data) {
         usleep(10000);
         pthread_mutex_lock(&mutex);
 
-        snprintf(message, MESSAGE_SIZE, "Trolley nr. %d is ending moving.", a_trolley -> id);
-        printf("%s", append_time(message));
+        print_message("Trolley nr. %d is ending moving.", a_trolley -> id);
 
         while (get_first_queue(trolleys_queue, (void**) &object) == QUEUE_SUCCESS && object != a_trolley)
             pthread_cond_wait(&cond_new_trolley_can_approach, &mutex);
 
-        snprintf(message, MESSAGE_SIZE, "Trolley nr. %d is opening doors.", a_trolley -> id);
-        printf("%s", append_time(message));
+        print_message("Trolley nr. %d is opening doors.", a_trolley -> id);
 
         while (a_trolley -> load != 0) {
 
@@ -222,8 +208,7 @@ void* trolley_loop(void* data) {
             a_trolley -> load--;
         }
 
-        snprintf(message, MESSAGE_SIZE, "Trolley nr. %d is closing doors.", a_trolley -> id);
-        printf("%s", append_time(message));
+        print_message("Trolley nr. %d is closing doors.", a_trolley -> id);
     }
 
     trolleys_left--;
@@ -232,8 +217,7 @@ void* trolley_loop(void* data) {
     pthread_cond_broadcast(&cond_new_trolley_can_approach);
     pthread_cond_broadcast(&cond_waiting_for_passenger_to_enter);
 
-    snprintf(message, MESSAGE_SIZE, "Trolley nr. %d is closing it's thread.", a_trolley -> id);
-    printf("%s", append_time(message));
+    print_message("Trolley nr. %d is closing it's thread.", a_trolley -> id);
 
     pthread_mutex_unlock(&mutex);
     return NULL;
