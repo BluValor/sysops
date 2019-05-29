@@ -1,5 +1,5 @@
 **/.idea
-**/cmake_build_debug
+**/cmake-build-debug
 **/CMakeLists.txt
 
 # Prerequisites
