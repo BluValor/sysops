@@ -1,0 +1,3 @@
+/media/bluvalor/Mint_HDD/AGH/sysopy/sysopy_lab_8/zad1/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/media/bluvalor/Mint_HDD/AGH/sysopy/sysopy_lab_8/zad1/cmake-build-debug/CMakeFiles/zad1.dir
+/media/bluvalor/Mint_HDD/AGH/sysopy/sysopy_lab_8/zad1/cmake-build-debug/CMakeFiles/edit_cache.dir
